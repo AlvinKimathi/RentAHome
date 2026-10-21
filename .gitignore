@@ -41,3 +41,10 @@ desktop.ini
 scratch/
 tmp/
 *.tmp
+
+# Presentations & Project documents
+*.pptx
+*.ppt
+*.docx
+*.doc
+
