@@ -17,7 +17,8 @@ class Database {
                 $username = $db['user'] ?? '';
                 $password = $db['pass'] ?? '';
 
-                $dsn = "pgsql:host={$host};port={$port};dbname={$dbName};sslmode=require";
+                $sslmode = (strpos($host, 'render.com') !== false) ? 'require' : 'prefer';
+                $dsn = "pgsql:host={$host};port={$port};dbname={$dbName};sslmode={$sslmode}";
                 $options = [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
