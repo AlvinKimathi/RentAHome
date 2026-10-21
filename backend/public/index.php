@@ -49,6 +49,16 @@ if (strpos($uri, '/uploads/') === 0) {
 
 // 3. Router
 try {
+    // Health check / Root
+    if (($uri === '/' || $uri === '/api' || $uri === '/health') && $method === 'GET') {
+        echo json_encode([
+            'status' => 'healthy',
+            'service' => 'RentAHome API',
+            'version' => '1.0.0'
+        ]);
+        exit;
+    }
+
     // Auth Routes
     if ($uri === '/api/auth/register' && $method === 'POST') {
         AuthController::register();
@@ -180,7 +190,10 @@ try {
         $target = $uploadDir . $filename;
 
         if (move_uploaded_file($file['tmp_name'], $target)) {
-            $url = 'http://localhost:8000/uploads/' . $filename;
+            $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+            $protocol = $isHttps ? 'https://' : 'http://';
+            $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8000';
+            $url = $protocol . $host . '/uploads/' . $filename;
             echo json_encode([
                 'success' => true,
                 'url' => $url,

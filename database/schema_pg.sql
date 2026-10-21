@@ -1,0 +1,59 @@
+-- PostgreSQL Schema for Render Deployment
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL PRIMARY KEY,
+    full_name VARCHAR(150) NOT NULL,
+    phone VARCHAR(25) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    role VARCHAR(50) NOT NULL DEFAULT 'tenant',
+    password VARCHAR(255) NOT NULL,
+    is_active SMALLINT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS houses (
+    house_id SERIAL PRIMARY KEY,
+    landlord_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    house_type VARCHAR(100) NOT NULL,
+    rent NUMERIC(10, 2) NOT NULL,
+    deposit NUMERIC(10, 2) DEFAULT 0.00,
+    description TEXT NOT NULL,
+    amenities TEXT DEFAULT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Vacant',
+    approval_status VARCHAR(50) NOT NULL DEFAULT 'approved',
+    beds INT DEFAULT 1,
+    baths INT DEFAULT 1,
+    parking SMALLINT DEFAULT 0,
+    date_posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS house_images (
+    image_id SERIAL PRIMARY KEY,
+    house_id INT NOT NULL REFERENCES houses(house_id) ON DELETE CASCADE,
+    image_path VARCHAR(500) NOT NULL,
+    is_primary SMALLINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS bookings (
+    booking_id SERIAL PRIMARY KEY,
+    house_id INT NOT NULL REFERENCES houses(house_id) ON DELETE CASCADE,
+    tenant_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    booking_date DATE NOT NULL,
+    booking_time VARCHAR(20) DEFAULT '10:00 AM',
+    message TEXT DEFAULT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS password_resets (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(150) NOT NULL,
+    code VARCHAR(10) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

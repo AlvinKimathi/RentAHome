@@ -158,9 +158,10 @@ class AuthController {
         // Delete any existing codes for this email
         $pdo->prepare('DELETE FROM password_resets WHERE email = ?')->execute([$email]);
 
-        // Insert new reset code with 15 minute expiry calculated directly in MySQL
-        $insert = $pdo->prepare('INSERT INTO password_resets (email, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))');
-        $insert->execute([$email, $code]);
+        // Insert new reset code with 15 minute expiry
+        $expiresAt = date('Y-m-d H:i:s', time() + (15 * 60));
+        $insert = $pdo->prepare('INSERT INTO password_resets (email, code, expires_at) VALUES (?, ?, ?)');
+        $insert->execute([$email, $code, $expiresAt]);
 
         echo json_encode([
             'success' => true,
