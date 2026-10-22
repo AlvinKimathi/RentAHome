@@ -81,6 +81,15 @@ class Database {
                     $pdo->exec(file_get_contents($seedFile));
                 }
             }
+
+            // Ensure demo passwords match admin123, landlord123, tenant123
+            $adminHash = '$2y$10$yiUOv0AFCzKmFCvE64FABe78WT5TxBPeuDYZfY3E5zV8C16opw6P.';
+            $landlordHash = '$2y$10$GSLFR5sWD2fcM7f5vBMl1OuWhl08vnW89F5wwMCabOzJiTmJ9G3/2';
+            $tenantHash = '$2y$10$BamPgW3NSWanAP1JMtrWcu8pTb7EXuUNfQoVhu9B8Aqj49MFBK.Zi';
+
+            $pdo->prepare("UPDATE users SET password = ? WHERE email = 'admin@leon.com'")->execute([$adminHash]);
+            $pdo->prepare("UPDATE users SET password = ? WHERE email = 'landlord@leon.com'")->execute([$landlordHash]);
+            $pdo->prepare("UPDATE users SET password = ? WHERE email = 'tenant@leon.com'")->execute([$tenantHash]);
         } catch (Throwable $t) {
             error_log('Database schema initialization error: ' . $t->getMessage());
         }

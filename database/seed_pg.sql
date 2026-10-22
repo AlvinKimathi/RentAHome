@@ -6,7 +6,9 @@ INSERT INTO users (full_name, phone, email, role, password) VALUES
 ON CONFLICT (email) DO NOTHING;
 
 -- Set realistic passwords ('admin123', 'landlord123', 'tenant123')
-UPDATE users SET password = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' WHERE email IN ('admin@leon.com', 'landlord@leon.com', 'tenant@leon.com');
+UPDATE users SET password = '$2y$10$yiUOv0AFCzKmFCvE64FABe78WT5TxBPeuDYZfY3E5zV8C16opw6P.' WHERE email = 'admin@leon.com';
+UPDATE users SET password = '$2y$10$GSLFR5sWD2fcM7f5vBMl1OuWhl08vnW89F5wwMCabOzJiTmJ9G3/2' WHERE email = 'landlord@leon.com';
+UPDATE users SET password = '$2y$10$BamPgW3NSWanAP1JMtrWcu8pTb7EXuUNfQoVhu9B8Aqj49MFBK.Zi' WHERE email = 'tenant@leon.com';
 
 -- Insert Initial Sample Houses
 INSERT INTO houses (landlord_id, title, location, house_type, rent, deposit, description, amenities, status, approval_status, beds, baths, parking)
