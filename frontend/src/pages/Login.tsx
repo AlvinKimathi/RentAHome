@@ -91,13 +91,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     setError(null);
     sessionStorage.setItem('rentahome_oauth_role', selectedRole);
 
-    const configuredClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || localStorage.getItem('rentahome_google_client_id') || '';
-
-    // If client ID is missing or is the dummy placeholder, open setup dialog rather than failing with Google 401
-    if (!configuredClientId || configuredClientId.includes('104829104812-rentahome.apps.googleusercontent.com')) {
-      setIsGoogleModalOpen(true);
-      return;
-    }
+    const configuredClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || localStorage.getItem('rentahome_google_client_id') || '453326713150-ts18piauc64rdpujp4molat38i91malj.apps.googleusercontent.com';
 
     setIsLoading(true);
     const redirectUri = window.location.origin;

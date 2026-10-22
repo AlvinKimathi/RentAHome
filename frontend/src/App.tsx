@@ -52,6 +52,8 @@ function AppContent() {
       idToken = params.get('id_token');
       accessToken = params.get('access_token');
       window.history.replaceState(null, '', window.location.pathname);
+    } else if (hash && hash.includes('error=')) {
+      window.history.replaceState(null, '', window.location.pathname);
     } else if (search && (search.includes('id_token=') || search.includes('access_token='))) {
       const params = new URLSearchParams(search);
       idToken = params.get('id_token');

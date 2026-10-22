@@ -233,9 +233,34 @@ class AuthController {
         $accessToken = trim($data['access_token'] ?? '');
 
         // 1. Verify with Google API if an OAuth token is provided
+        $fetchGoogle = function(string $url, array $headers = []): ?string {
+            if (function_exists('curl_init')) {
+                $ch = curl_init($url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+                curl_setopt($ch, CURLOPT_USERAGENT, 'RentAHome-Auth');
+                if (!empty($headers)) {
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                }
+                $res = curl_exec($ch);
+                curl_close($ch);
+                if ($res !== false && !empty($res)) return $res;
+            }
+            $opts = [
+                'http' => [
+                    'method' => 'GET',
+                    'header' => implode("\r\n", array_merge(['User-Agent: RentAHome-Auth'], $headers)) . "\r\n",
+                    'timeout' => 8
+                ]
+            ];
+            $context = stream_context_create($opts);
+            $res = @file_get_contents($url, false, $context);
+            return ($res !== false && !empty($res)) ? $res : null;
+        };
+
         if (!empty($idToken)) {
             $verifyUrl = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . urlencode($idToken);
-            $resp = @file_get_contents($verifyUrl);
+            $resp = $fetchGoogle($verifyUrl);
             if ($resp) {
                 $payload = json_decode($resp, true);
                 if (!empty($payload['email'])) {
@@ -244,14 +269,7 @@ class AuthController {
                 }
             }
         } elseif (!empty($accessToken)) {
-            $opts = [
-                'http' => [
-                    'method' => 'GET',
-                    'header' => "Authorization: Bearer {$accessToken}\r\nUser-Agent: RentAHome-Auth\r\n"
-                ]
-            ];
-            $context = stream_context_create($opts);
-            $resp = @file_get_contents('https://www.googleapis.com/oauth2/v3/userinfo', false, $context);
+            $resp = $fetchGoogle('https://www.googleapis.com/oauth2/v3/userinfo', ["Authorization: Bearer {$accessToken}"]);
             if ($resp) {
                 $payload = json_decode($resp, true);
                 if (!empty($payload['email'])) {
