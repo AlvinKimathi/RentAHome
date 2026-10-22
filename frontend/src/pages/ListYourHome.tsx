@@ -142,6 +142,43 @@ export const ListYourHome: React.FC<ListYourHomeProps> = ({
   const canProceedStep2 = imageUrls.length > 0;
   const canProceedStep3 = parseFloat(rent) > 0;
 
+  if (!user || user.role === 'tenant') {
+    return (
+      <div className="pt-28 md:pt-36 pb-24 bg-neutral-50 min-h-screen flex items-center justify-center">
+        <div className="max-w-[560px] w-full mx-auto px-4 text-center">
+          <div className="bg-white rounded-3xl p-8 md:p-12 border border-neutral-200 shadow-xl">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-5">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-950 mb-3 tracking-tight">
+              Landlords & Admins Only
+            </h2>
+            <p className="text-neutral-600 text-sm leading-relaxed mb-8">
+              Posting vacant rental properties is strictly reserved for verified landlords and property administrators.
+              {!user
+                ? ' Please sign in with a landlord account to post a vacancy.'
+                : ' You are currently signed in as a Tenant. Switch to or register a Landlord account to advertise vacancies.'}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={onRequireLogin}
+                className="px-6 py-3.5 rounded-xl bg-black text-white text-xs font-bold hover:bg-neutral-800 transition-colors shadow-md cursor-pointer"
+              >
+                {!user ? 'Sign In as Landlord' : 'Sign in as Landlord'}
+              </button>
+              <button
+                onClick={onBack}
+                className="px-6 py-3.5 rounded-xl bg-neutral-100 text-neutral-800 text-xs font-bold hover:bg-neutral-200 transition-colors cursor-pointer"
+              >
+                Return to Homes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-28 md:pt-36 pb-24 bg-neutral-50 min-h-screen">
       <div className="max-w-[1000px] mx-auto px-4 md:px-8">

@@ -57,3 +57,14 @@ CREATE TABLE IF NOT EXISTS password_resets (
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    log_id SERIAL PRIMARY KEY,
+    user_id INT NULL,
+    user_name VARCHAR(150) NOT NULL,
+    user_role VARCHAR(50) NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    details TEXT NOT NULL,
+    ip_address VARCHAR(50) DEFAULT '127.0.0.1',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -24,6 +24,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
+import { GoogleSignInModal } from '../components/GoogleSignInModal';
 
 interface LandingProps {
   onSuccess: (role?: string) => void;
@@ -39,6 +40,7 @@ export const Landing: React.FC<LandingProps> = ({
   const [selectedRole, setSelectedRole] = useState<'tenant' | 'landlord'>('tenant');
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
   // Form Fields
   const [fullName, setFullName] = useState('');
@@ -108,28 +110,9 @@ export const Landing: React.FC<LandingProps> = ({
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
+  const handleGoogleSignIn = () => {
     setError(null);
-    try {
-      const googleEmail = isSignUp && email.trim() ? email.trim() : 'alex.google@gmail.com';
-      const googleName = isSignUp && fullName.trim() ? fullName.trim() : 'Google User';
-
-      const res = await api.auth.googleLogin({
-        email: googleEmail,
-        full_name: googleName,
-        role: selectedRole,
-      });
-
-      if (res.success && res.token && res.user) {
-        login(res.token, res.user);
-        onSuccess(res.user.role);
-      }
-    } catch (err: any) {
-      setError(err.message || 'Google sign-in failed.');
-    } finally {
-      setIsLoading(false);
-    }
+    setIsGoogleModalOpen(true);
   };
 
   const scrollToSection = (id: string) => {
@@ -808,6 +791,14 @@ export const Landing: React.FC<LandingProps> = ({
           setEmail(resetEmail);
           setError(null);
         }}
+      />
+
+      {/* Google Sign-In Interactive Modal */}
+      <GoogleSignInModal
+        isOpen={isGoogleModalOpen}
+        onClose={() => setIsGoogleModalOpen(false)}
+        onSuccess={(role) => onSuccess(role)}
+        initialRole={selectedRole}
       />
     </div>
   );

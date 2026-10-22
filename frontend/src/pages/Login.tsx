@@ -4,6 +4,7 @@ import { Mail, Lock, User as UserIcon, Phone, ArrowRight, ArrowLeft, AlertCircle
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
+import { GoogleSignInModal } from '../components/GoogleSignInModal';
 
 interface LoginProps {
   onSuccess: () => void;
@@ -16,6 +17,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   const [selectedRole, setSelectedRole] = useState<'tenant' | 'landlord'>('tenant');
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
   // Form Fields
   const [fullName, setFullName] = useState('');
@@ -85,28 +87,9 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
+  const handleGoogleSignIn = () => {
     setError(null);
-    try {
-      const googleEmail = isSignUp && email.trim() ? email.trim() : 'alex.google@gmail.com';
-      const googleName = isSignUp && fullName.trim() ? fullName.trim() : 'Google User';
-
-      const res = await api.auth.googleLogin({
-        email: googleEmail,
-        full_name: googleName,
-        role: selectedRole,
-      });
-
-      if (res.success && res.token && res.user) {
-        login(res.token, res.user);
-        onSuccess();
-      }
-    } catch (err: any) {
-      setError(err.message || 'Google sign-in failed.');
-    } finally {
-      setIsLoading(false);
-    }
+    setIsGoogleModalOpen(true);
   };
 
   return (
@@ -505,6 +488,13 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
           setEmail(resetEmail);
           setError(null);
         }}
+      />
+
+      <GoogleSignInModal
+        isOpen={isGoogleModalOpen}
+        onClose={() => setIsGoogleModalOpen(false)}
+        onSuccess={() => onSuccess()}
+        initialRole={selectedRole}
       />
     </div>
   );

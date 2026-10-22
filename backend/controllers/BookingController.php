@@ -39,6 +39,16 @@ class BookingController {
         $stmt->execute([$houseId, $user['user_id'], $bookingDate, $bookingTime, $message]);
         $bookingId = (int)$pdo->lastInsertId();
 
+        if (class_exists('AdminController')) {
+            AdminController::logAction(
+                (int)$user['user_id'],
+                $user['full_name'],
+                $user['role'],
+                'BOOKING_CREATED',
+                "Tenant requested viewing inspection for property #{$houseId} ('{$house['title']}') on {$bookingDate} at {$bookingTime}"
+            );
+        }
+
         http_response_code(201);
         echo json_encode([
             'success' => true,

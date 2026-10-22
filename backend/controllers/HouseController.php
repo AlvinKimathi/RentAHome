@@ -187,6 +187,16 @@ class HouseController {
         }
 
         http_response_code(201);
+        if (class_exists('AdminController')) {
+            AdminController::logAction(
+                (int)$user['user_id'],
+                $user['full_name'],
+                $user['role'],
+                'HOUSE_LISTED',
+                "Listed new vacancy: '{$title}' in {$location} (KES " . number_format($rent, 2) . "/mo)"
+            );
+        }
+
         echo json_encode([
             'success' => true,
             'message' => 'House listed successfully!',

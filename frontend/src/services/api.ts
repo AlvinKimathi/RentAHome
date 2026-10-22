@@ -201,5 +201,17 @@ export const api = {
     async getReports() {
       return request<{ success: boolean; data: { by_type: any[]; by_location: any[] } }>('/admin/reports');
     },
+
+    async getAuditLogs(params?: { role?: string; search?: string }) {
+      const searchParams = new URLSearchParams();
+      if (params?.role) searchParams.append('role', params.role);
+      if (params?.search) searchParams.append('search', params.search);
+      const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return request<{ success: boolean; count: number; data: any[] }>(`/admin/audit-logs${query}`);
+    },
+
+    async getAnalytics() {
+      return request<{ success: boolean; data: any }>('/admin/analytics');
+    },
   },
 };

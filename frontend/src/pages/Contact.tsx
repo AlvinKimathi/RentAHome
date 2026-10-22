@@ -64,7 +64,9 @@ export const Contact: React.FC = () => {
                 <Phone className="w-5 h-5 text-neutral-900 flex-shrink-0" />
                 <div>
                   <span className="font-bold text-neutral-900 block">Phone & WhatsApp</span>
-                  <span>+254 700 123 456 / +254 712 345 678</span>
+                  <a href="https://wa.me/254718608582" target="_blank" rel="noopener noreferrer" className="hover:text-black hover:underline transition-colors">
+                    +254 718 608582
+                  </a>
                 </div>
               </div>
             </div>

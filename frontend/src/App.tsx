@@ -134,21 +134,42 @@ function AppContent() {
         )}
 
         {currentRoute === 'landlord-dashboard' && (
-          <LandlordDashboard
-            onNavigatePost={() => navigateTo('list-your-home')}
-            onSelectHouse={(id) => navigateTo('property-details', id)}
-          />
+          user && (user.role === 'landlord' || user.role === 'admin') ? (
+            <LandlordDashboard
+              onNavigatePost={() => navigateTo('list-your-home')}
+              onSelectHouse={(id) => navigateTo('property-details', id)}
+            />
+          ) : (
+            <Landing
+              onSuccess={handleAuthSuccess}
+              onExploreVacancies={() => navigateTo('listings')}
+            />
+          )
         )}
 
         {currentRoute === 'tenant-dashboard' && (
-          <TenantDashboard
-            onSelectHouse={(id) => navigateTo('property-details', id)}
-            onNavigateExplore={() => navigateTo('listings')}
-          />
+          user ? (
+            <TenantDashboard
+              onSelectHouse={(id) => navigateTo('property-details', id)}
+              onNavigateExplore={() => navigateTo('listings')}
+            />
+          ) : (
+            <Landing
+              onSuccess={handleAuthSuccess}
+              onExploreVacancies={() => navigateTo('listings')}
+            />
+          )
         )}
 
         {currentRoute === 'admin-dashboard' && (
-          <AdminDashboard />
+          user?.role === 'admin' ? (
+            <AdminDashboard />
+          ) : (
+            <Landing
+              onSuccess={handleAuthSuccess}
+              onExploreVacancies={() => navigateTo('listings')}
+            />
+          )
         )}
       </main>
 

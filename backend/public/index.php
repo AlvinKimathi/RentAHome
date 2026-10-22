@@ -161,6 +161,14 @@ try {
         AdminController::reports();
         exit;
     }
+    if ($uri === '/api/admin/audit-logs' && $method === 'GET') {
+        AdminController::auditLogs();
+        exit;
+    }
+    if ($uri === '/api/admin/analytics' && $method === 'GET') {
+        AdminController::analytics();
+        exit;
+    }
 
     // File Upload Route
     if ($uri === '/api/upload' && $method === 'POST') {

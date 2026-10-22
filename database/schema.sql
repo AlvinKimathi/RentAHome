@@ -73,3 +73,15 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
     `expires_at` DATETIME NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 6. Audit Logs Table
+CREATE TABLE IF NOT EXISTS `audit_logs` (
+    `log_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NULL,
+    `user_name` VARCHAR(150) NOT NULL,
+    `user_role` VARCHAR(50) NOT NULL,
+    `action` VARCHAR(100) NOT NULL,
+    `details` TEXT NOT NULL,
+    `ip_address` VARCHAR(50) DEFAULT '127.0.0.1',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
