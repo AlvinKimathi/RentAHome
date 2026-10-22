@@ -149,6 +149,16 @@ class BookingController {
         $updateStmt = $pdo->prepare('UPDATE bookings SET status = ? WHERE booking_id = ?');
         $updateStmt->execute([$newStatus, $id]);
 
+        if (class_exists('AdminController')) {
+            AdminController::logAction(
+                (int)$user['user_id'],
+                $user['full_name'],
+                $user['role'],
+                'BOOKING_STATUS_CHANGED',
+                "Booking inspection #{$id} status updated to '{$newStatus}'"
+            );
+        }
+
         echo json_encode([
             'success' => true,
             'message' => "Booking status updated to {$newStatus}.",

@@ -259,6 +259,16 @@ class HouseController {
             }
         }
 
+        if (class_exists('AdminController')) {
+            AdminController::logAction(
+                (int)$user['user_id'],
+                $user['full_name'],
+                $user['role'],
+                'HOUSE_UPDATED',
+                "Updated details for property '{$title}' (#{$id})"
+            );
+        }
+
         echo json_encode(['success' => true, 'message' => 'Listing updated successfully!']);
     }
 
@@ -287,6 +297,16 @@ class HouseController {
         $stmt = $pdo->prepare('UPDATE houses SET status = ? WHERE house_id = ?');
         $stmt->execute([$newStatus, $id]);
 
+        if (class_exists('AdminController')) {
+            AdminController::logAction(
+                (int)$user['user_id'],
+                $user['full_name'],
+                $user['role'],
+                'HOUSE_STATUS_CHANGED',
+                "Changed property #{$id} status to '{$newStatus}'"
+            );
+        }
+
         echo json_encode([
             'success' => true,
             'message' => "House status updated to {$newStatus}.",
@@ -298,7 +318,7 @@ class HouseController {
         $user = AuthMiddleware::requireRole(['landlord', 'admin']);
         $pdo = Database::getConnection();
 
-        $checkStmt = $pdo->prepare('SELECT landlord_id FROM houses WHERE house_id = ?');
+        $checkStmt = $pdo->prepare('SELECT landlord_id, title FROM houses WHERE house_id = ?');
         $checkStmt->execute([$id]);
         $house = $checkStmt->fetch();
 
@@ -316,6 +336,16 @@ class HouseController {
 
         $stmt = $pdo->prepare('DELETE FROM houses WHERE house_id = ?');
         $stmt->execute([$id]);
+
+        if (class_exists('AdminController')) {
+            AdminController::logAction(
+                (int)$user['user_id'],
+                $user['full_name'],
+                $user['role'],
+                'HOUSE_DELETED',
+                "Deleted property listing #{$id} ('" . ($house['title'] ?? 'Listing') . "')"
+            );
+        }
 
         echo json_encode(['success' => true, 'message' => 'Listing deleted successfully.']);
     }

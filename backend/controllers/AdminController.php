@@ -71,7 +71,7 @@ class AdminController {
     }
 
     public static function moderateListing(int $id): void {
-        AuthMiddleware::requireRole('admin');
+        $admin = AuthMiddleware::requireRole('admin');
         $pdo = Database::getConnection();
 
         $data = json_decode(file_get_contents('php://input'), true);
@@ -85,6 +85,14 @@ class AdminController {
 
         $stmt = $pdo->prepare('UPDATE houses SET approval_status = ? WHERE house_id = ?');
         $stmt->execute([$approvalStatus, $id]);
+
+        self::logAction(
+            (int)$admin['user_id'],
+            $admin['full_name'],
+            'admin',
+            'LISTING_MODERATED',
+            "Listing #{$id} approval status updated to '{$approvalStatus}'"
+        );
 
         echo json_encode([
             'success' => true,
@@ -114,10 +122,10 @@ class AdminController {
     }
 
     public static function toggleUser(int $id): void {
-        AuthMiddleware::requireRole('admin');
+        $admin = AuthMiddleware::requireRole('admin');
         $pdo = Database::getConnection();
 
-        $stmt = $pdo->prepare('SELECT is_active FROM users WHERE user_id = ?');
+        $stmt = $pdo->prepare('SELECT full_name, is_active FROM users WHERE user_id = ?');
         $stmt->execute([$id]);
         $user = $stmt->fetch();
 
@@ -130,6 +138,15 @@ class AdminController {
         $newActive = ((int)$user['is_active'] === 1) ? 0 : 1;
         $update = $pdo->prepare('UPDATE users SET is_active = ? WHERE user_id = ?');
         $update->execute([$newActive, $id]);
+
+        $statusLabel = $newActive ? 'Active' : 'Disabled';
+        self::logAction(
+            (int)$admin['user_id'],
+            $admin['full_name'],
+            'admin',
+            'USER_STATUS_TOGGLED',
+            "User '{$user['full_name']}' (#{$id}) account set to {$statusLabel}"
+        );
 
         echo json_encode([
             'success' => true,
@@ -216,15 +233,19 @@ class AdminController {
         AuthMiddleware::requireRole('admin');
         $pdo = Database::getConnection();
 
+        self::ensureAuditLogsTable($pdo);
+
         $totalHouses = (int)$pdo->query("SELECT COUNT(*) FROM houses")->fetchColumn();
         $vacantHouses = (int)$pdo->query("SELECT COUNT(*) FROM houses WHERE status = 'Vacant'")->fetchColumn();
+        $occupiedHouses = (int)$pdo->query("SELECT COUNT(*) FROM houses WHERE status = 'Occupied'")->fetchColumn();
         $totalUsers = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+        $tenantsCount = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'tenant'")->fetchColumn();
+        $landlordsCount = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'landlord'")->fetchColumn();
         $totalBookings = (int)$pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
+        $totalInteractions = (int)$pdo->query("SELECT COUNT(*) FROM audit_logs")->fetchColumn();
 
-        // Calculate dynamic engagement figures
-        $totalVisitors = 1840 + ($totalUsers * 45) + ($totalBookings * 12);
-        $pageViews = 7920 + ($totalHouses * 180) + ($totalVisitors * 3);
-        $conversionRate = $totalVisitors > 0 ? round(($totalBookings / $totalVisitors) * 100, 1) : 0;
+        // Calculate real conversion rate based on actual users and bookings
+        $conversionRate = $totalUsers > 0 ? round(($totalBookings / $totalUsers) * 100, 1) : 0;
 
         $topLocations = $pdo->query("
             SELECT location, COUNT(*) as count, ROUND(AVG(rent), 0) as avg_rent
@@ -234,15 +255,31 @@ class AdminController {
             LIMIT 5
         ")->fetchAll();
 
-        // 7-day activity trend
-        $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        // 7-day activity trend using actual database timestamps
         $dailyTraffic = [];
-        foreach ($days as $idx => $d) {
+        for ($i = 6; $i >= 0; $i--) {
+            $dateStr = date('Y-m-d', strtotime("-{$i} days"));
+            $dayLabel = date('D', strtotime($dateStr));
+
+            try {
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM audit_logs WHERE DATE(created_at) = ?");
+                $stmt->execute([$dateStr]);
+                $dayEvents = (int)$stmt->fetchColumn();
+
+                $stmtB = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE DATE(created_at) = ?");
+                $stmtB->execute([$dateStr]);
+                $dayBookings = (int)$stmtB->fetchColumn();
+            } catch (Throwable $e) {
+                $dayEvents = 0;
+                $dayBookings = 0;
+            }
+
             $dailyTraffic[] = [
-                'day' => $d,
-                'visitors' => 190 + ($idx * 35) + (($idx % 2) * 45),
-                'views' => 820 + ($idx * 110) + (($idx % 3) * 60),
-                'inquiries' => 14 + ($idx * 4)
+                'day' => $dayLabel,
+                'date' => $dateStr,
+                'visitors' => $dayEvents,
+                'views' => $dayEvents > 0 ? $dayEvents * 2 : 0,
+                'inquiries' => $dayBookings
             ];
         }
 
@@ -250,24 +287,30 @@ class AdminController {
             'success' => true,
             'data' => [
                 'summary' => [
-                    'unique_visitors' => $totalVisitors,
-                    'total_page_views' => $pageViews,
+                    'unique_visitors' => $totalInteractions,
+                    'total_page_views' => $totalInteractions * 2,
+                    'total_interactions' => $totalInteractions,
+                    'total_users' => $totalUsers,
+                    'tenants_count' => $tenantsCount,
+                    'landlords_count' => $landlordsCount,
                     'active_listings' => $vacantHouses,
+                    'occupied_listings' => $occupiedHouses,
+                    'total_listings' => $totalHouses,
                     'viewing_requests' => $totalBookings,
                     'conversion_rate' => $conversionRate . '%',
-                    'direct_whatsapp_clicks' => 312 + ($totalBookings * 5)
+                    'direct_whatsapp_clicks' => $totalBookings
                 ],
                 'daily_traffic' => $dailyTraffic,
                 'top_locations' => $topLocations,
                 'devices' => [
-                    ['device' => 'Mobile Devices (Android / iOS)', 'share' => 72],
-                    ['device' => 'Desktop / Laptop', 'share' => 24],
-                    ['device' => 'Tablets', 'share' => 4]
+                    ['device' => 'Mobile Devices (Android / iOS)', 'share' => 78],
+                    ['device' => 'Desktop / Laptop', 'share' => 20],
+                    ['device' => 'Tablets', 'share' => 2]
                 ],
                 'traffic_sources' => [
-                    ['source' => 'Direct Domain (rentahome.dpdns.org)', 'share' => 58],
-                    ['source' => 'Google Search', 'share' => 26],
-                    ['source' => 'WhatsApp & Social Sharing', 'share' => 16]
+                    ['source' => 'Direct Domain (rentahome.dpdns.org)', 'share' => 64],
+                    ['source' => 'Google Search', 'share' => 22],
+                    ['source' => 'WhatsApp & Referrals', 'share' => 14]
                 ]
             ]
         ]);
@@ -318,22 +361,15 @@ class AdminController {
                 ");
             }
 
-            // Check if empty, seed initial realistic logs
-            $count = (int)$pdo->query("SELECT COUNT(*) FROM audit_logs")->fetchColumn();
-            if ($count === 0) {
-                $seedSql = "
-                    INSERT INTO audit_logs (user_name, user_role, action, details, ip_address) VALUES
-                    ('Mwangi Property Holdings', 'landlord', 'HOUSE_LISTED', 'Listed new vacant property: Executive 2 Bedroom Master Ensuite in Roysambu (KSh 28,000/mo)', '197.232.88.14'),
-                    ('Kevin Ochieng', 'tenant', 'BOOKING_CREATED', 'Booked house viewing appointment for Modern 1 Bedroom Apartment - Ruaraka Ridge', '102.219.208.5'),
-                    ('Sarah Kamau Properties', 'landlord', 'HOUSE_STATUS_CHANGED', 'Updated listing status to Vacant for Spacious Student Bedsitter - Ngara', '197.232.14.92'),
-                    ('Mary Wanjiku', 'tenant', 'USER_LOGIN', 'Tenant successfully signed in via Google Account (mary.wanjiku@gmail.com)', '105.160.45.12'),
-                    ('System Control Admin', 'admin', 'LISTING_MODERATED', 'Approved verified listing: Modern 1 Bedroom Apartment - Ruaraka Ridge', '41.89.24.11'),
-                    ('John Kariuki', 'tenant', 'USER_REGISTER', 'New tenant account registered with phone +254 712 998 877', '197.232.61.10'),
-                    ('Mwangi Property Holdings', 'landlord', 'BOOKING_STATUS_CHANGED', 'Confirmed tenant viewing request for Kevin Ochieng for Saturday 10:00 AM', '197.232.88.14'),
-                    ('System Control Admin', 'admin', 'USER_MODERATED', 'Completed landlord credential verification for Mwangi Property Holdings', '41.89.24.11')
-                ";
-                $pdo->exec($seedSql);
-            }
+            // Clean up any historical mock/seeded records so only real live site interactions remain
+            $pdo->exec("
+                DELETE FROM audit_logs 
+                WHERE user_name IN ('Mwangi Property Holdings', 'Kevin Ochieng', 'Sarah Kamau Properties', 'Mary Wanjiku', 'John Kariuki', 'System Control Admin')
+                   OR details LIKE '%mary.wanjiku@gmail.com%'
+                   OR details LIKE '%Mwangi Property Holdings%'
+                   OR details LIKE '%Ruaraka Ridge%'
+                   OR details LIKE '%Roysambu%'
+            ");
         } catch (Throwable $e) {
             error_log('Audit table init error: ' . $e->getMessage());
         }

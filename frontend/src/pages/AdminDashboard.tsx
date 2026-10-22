@@ -544,63 +544,62 @@ export const AdminDashboard: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white rounded-3xl p-6 border border-neutral-200 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Total Visitors</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Total Interactions</span>
                   <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-3xl font-extrabold text-neutral-950">
+                  {analyticsData?.summary?.total_interactions ?? auditLogs.length}
+                </div>
+                <div className="flex items-center gap-1.5 mt-2 text-xs font-bold text-emerald-600">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Real logged system events</span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-3xl p-6 border border-neutral-200 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Registered Accounts</span>
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
                     <Users className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="text-3xl font-extrabold text-neutral-950">
-                  {analyticsData?.summary?.unique_visitors?.toLocaleString() || '1,840'}
+                  {analyticsData?.summary?.total_users ?? 0}
                 </div>
-                <div className="flex items-center gap-1.5 mt-2 text-xs font-bold text-emerald-600">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>+18.4% this week</span>
+                <div className="text-xs text-neutral-500 mt-2 font-medium">
+                  {analyticsData?.summary?.tenants_count ?? 0} Tenants • {analyticsData?.summary?.landlords_count ?? 0} Landlords
                 </div>
               </div>
 
               <div className="bg-white rounded-3xl p-6 border border-neutral-200 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Page Views</span>
-                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                    <Eye className="w-4 h-4" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Active Vacancies</span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <Home className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="text-3xl font-extrabold text-neutral-950">
-                  {analyticsData?.summary?.total_page_views?.toLocaleString() || '7,920'}
+                  {analyticsData?.summary?.active_listings ?? 0}
                 </div>
-                <div className="flex items-center gap-1.5 mt-2 text-xs font-bold text-emerald-600">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>+24.1% this week</span>
+                <div className="text-xs text-neutral-500 mt-2 font-medium">
+                  Out of {analyticsData?.summary?.total_listings ?? 0} total properties
                 </div>
               </div>
 
               <div className="bg-white rounded-3xl p-6 border border-neutral-200 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Viewing Inquiries</span>
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Viewing Requests</span>
+                  <div className="w-8 h-8 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
                     <Calendar className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="text-3xl font-extrabold text-neutral-950">
-                  {analyticsData?.summary?.viewing_requests || '12'}
+                  {analyticsData?.summary?.viewing_requests ?? 0}
                 </div>
-                <div className="text-xs text-neutral-500 mt-2">
-                  Conversion Rate: <span className="font-bold text-neutral-900">{analyticsData?.summary?.conversion_rate || '14.2%'}</span>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl p-6 border border-neutral-200 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">WhatsApp Inquiries</span>
-                  <div className="w-8 h-8 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
-                    <MessageSquare className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="text-3xl font-extrabold text-neutral-950">
-                  {analyticsData?.summary?.direct_whatsapp_clicks || '312'}
-                </div>
-                <div className="text-xs text-neutral-500 mt-2">
-                  Direct landlord contact clicks
+                <div className="text-xs text-neutral-500 mt-2 font-medium">
+                  Conversion Rate: <span className="font-bold text-neutral-900">{analyticsData?.summary?.conversion_rate || '0%'}</span>
                 </div>
               </div>
             </div>
@@ -611,8 +610,8 @@ export const AdminDashboard: React.FC = () => {
               <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-neutral-200 shadow-sm">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="font-bold text-base text-neutral-950">7-Day Visitor & Interaction Trend</h3>
-                    <p className="text-xs text-neutral-500 mt-0.5">Daily breakdown of site visitors and page interactions.</p>
+                    <h3 className="font-bold text-base text-neutral-950">7-Day Live Interaction Trend</h3>
+                    <p className="text-xs text-neutral-500 mt-0.5">Real recorded interactions and viewing inquiries per day.</p>
                   </div>
                   <span className="text-xs font-bold text-neutral-600 bg-neutral-100 px-3 py-1 rounded-full">
                     Last 7 Days
@@ -620,32 +619,37 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {(analyticsData?.daily_traffic || [
-                    { day: 'Mon', visitors: 235, views: 980, inquiries: 14 },
-                    { day: 'Tue', visitors: 290, views: 1120, inquiries: 18 },
-                    { day: 'Wed', visitors: 340, views: 1410, inquiries: 22 },
-                    { day: 'Thu', visitors: 310, views: 1290, inquiries: 19 },
-                    { day: 'Fri', visitors: 380, views: 1680, inquiries: 28 },
-                    { day: 'Sat', visitors: 420, views: 1840, inquiries: 32 },
-                    { day: 'Sun', visitors: 360, views: 1540, inquiries: 24 },
-                  ]).map((item: any, idx: number) => {
-                    const maxVal = 500;
-                    const pct = Math.min(100, Math.round((item.visitors / maxVal) * 100));
+                  {(() => {
+                    const trafficList = analyticsData?.daily_traffic || [];
+                    const maxVal = Math.max(1, ...trafficList.map((t: any) => t.visitors || t.events || 0));
 
-                    return (
-                      <div key={idx} className="flex items-center gap-4 text-xs">
-                        <span className="w-8 font-bold text-neutral-700">{item.day}</span>
-                        <div className="flex-1 bg-neutral-100 h-6 rounded-lg overflow-hidden flex items-center p-1">
-                          <div
-                            className="bg-neutral-950 h-full rounded-md transition-all duration-500"
-                            style={{ width: `${pct}%` }}
-                          />
+                    if (trafficList.length === 0) {
+                      return (
+                        <div className="py-8 text-center text-xs text-neutral-400">
+                          No logged traffic events recorded in the last 7 days yet.
                         </div>
-                        <span className="w-20 text-right font-bold text-neutral-900">{item.visitors} visitors</span>
-                        <span className="w-20 text-right text-neutral-400">{item.views} views</span>
-                      </div>
-                    );
-                  })}
+                      );
+                    }
+
+                    return trafficList.map((item: any, idx: number) => {
+                      const count = item.visitors || item.events || 0;
+                      const pct = Math.min(100, Math.round((count / maxVal) * 100));
+
+                      return (
+                        <div key={idx} className="flex items-center gap-4 text-xs">
+                          <span className="w-8 font-bold text-neutral-700">{item.day}</span>
+                          <div className="flex-1 bg-neutral-100 h-6 rounded-lg overflow-hidden flex items-center p-1">
+                            <div
+                              className="bg-neutral-950 h-full rounded-md transition-all duration-500"
+                              style={{ width: `${Math.max(pct, count > 0 ? 8 : 0)}%` }}
+                            />
+                          </div>
+                          <span className="w-24 text-right font-bold text-neutral-900">{count} events</span>
+                          <span className="w-24 text-right text-neutral-400">{item.inquiries ?? 0} inquiries</span>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
 

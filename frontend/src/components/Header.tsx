@@ -58,10 +58,10 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentRoute }) => {
             onClick={() => onNavigate(user ? 'home' : 'landing')}
             className="flex items-center gap-2 group text-left cursor-pointer focus:outline-none"
           >
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg transition-colors ${
-              isOpaque ? 'bg-white text-black' : 'bg-black text-white'
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center p-1 transition-colors ${
+              isOpaque ? 'bg-white border border-neutral-700' : 'bg-white border border-neutral-200 shadow-sm'
             }`}>
-              R
+              <img src="/logo.png" alt="RentAHome" className="w-full h-full object-contain" />
             </div>
             <div>
               <span className="font-bold text-xl md:text-2xl tracking-tight block leading-none">
