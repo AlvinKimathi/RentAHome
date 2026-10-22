@@ -64,7 +64,7 @@ export const api = {
       });
     },
 
-    async googleLogin(payload: { email: string; full_name?: string; role?: string }) {
+    async googleLogin(payload: { id_token?: string; access_token?: string; email?: string; full_name?: string; role?: string }) {
       return request<{ success: boolean; token: string; user: User; message: string }>('/auth/google', {
         method: 'POST',
         body: JSON.stringify(payload),

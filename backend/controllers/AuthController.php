@@ -229,10 +229,41 @@ class AuthController {
         $email = trim($data['email'] ?? '');
         $fullName = trim($data['full_name'] ?? '');
         $role = trim($data['role'] ?? 'tenant');
+        $idToken = trim($data['id_token'] ?? '');
+        $accessToken = trim($data['access_token'] ?? '');
+
+        // 1. Verify with Google API if an OAuth token is provided
+        if (!empty($idToken)) {
+            $verifyUrl = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . urlencode($idToken);
+            $resp = @file_get_contents($verifyUrl);
+            if ($resp) {
+                $payload = json_decode($resp, true);
+                if (!empty($payload['email'])) {
+                    $email = strtolower(trim($payload['email']));
+                    $fullName = trim($payload['name'] ?? $fullName);
+                }
+            }
+        } elseif (!empty($accessToken)) {
+            $opts = [
+                'http' => [
+                    'method' => 'GET',
+                    'header' => "Authorization: Bearer {$accessToken}\r\nUser-Agent: RentAHome-Auth\r\n"
+                ]
+            ];
+            $context = stream_context_create($opts);
+            $resp = @file_get_contents('https://www.googleapis.com/oauth2/v3/userinfo', false, $context);
+            if ($resp) {
+                $payload = json_decode($resp, true);
+                if (!empty($payload['email'])) {
+                    $email = strtolower(trim($payload['email']));
+                    $fullName = trim($payload['name'] ?? $fullName);
+                }
+            }
+        }
 
         if (empty($email)) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Google email is required.']);
+            echo json_encode(['success' => false, 'message' => 'Valid Google authentication is required.']);
             return;
         }
 
@@ -282,7 +313,7 @@ class AuthController {
         $token = SimpleJWT::generate($tokenPayload);
 
         if (class_exists('AdminController')) {
-            AdminController::logAction((int)$user['user_id'], $user['full_name'], $user['role'], 'USER_LOGIN', "User signed in successfully ({$email})");
+            AdminController::logAction((int)$user['user_id'], $user['full_name'], $user['role'], 'GOOGLE_LOGIN', "User authenticated via Google Account ({$email})");
         }
 
         echo json_encode([

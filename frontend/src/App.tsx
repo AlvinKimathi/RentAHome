@@ -17,10 +17,10 @@ import { House } from './types';
 import { api } from './services/api';
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   // The first thing visitors see is the Landing Page
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || localStorage.getItem('geta_auth_token');
     return token ? 'home' : 'landing';
   });
   const [selectedHouseId, setSelectedHouseId] = useState<number | null>(null);
@@ -40,6 +40,44 @@ function AppContent() {
 
   useEffect(() => {
     loadFeatured();
+
+    // Handle Google OAuth callback from accounts.google.com
+    const hash = window.location.hash;
+    const search = window.location.search;
+    let idToken: string | null = null;
+    let accessToken: string | null = null;
+
+    if (hash && (hash.includes('id_token=') || hash.includes('access_token='))) {
+      const params = new URLSearchParams(hash.substring(1));
+      idToken = params.get('id_token');
+      accessToken = params.get('access_token');
+      window.history.replaceState(null, '', window.location.pathname);
+    } else if (search && (search.includes('id_token=') || search.includes('access_token='))) {
+      const params = new URLSearchParams(search);
+      idToken = params.get('id_token');
+      accessToken = params.get('access_token');
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+
+    if (idToken || accessToken) {
+      const role = (sessionStorage.getItem('rentahome_oauth_role') as 'tenant' | 'landlord') || 'tenant';
+      sessionStorage.removeItem('rentahome_oauth_role');
+
+      api.auth.googleLogin({
+        id_token: idToken || undefined,
+        access_token: accessToken || undefined,
+        role,
+      })
+        .then((res) => {
+          if (res.success && res.token && res.user) {
+            login(res.token, res.user);
+            handleAuthSuccess(res.user.role);
+          }
+        })
+        .catch((err) => {
+          console.error('Google OAuth verification failed:', err);
+        });
+    }
   }, []);
 
   const navigateTo = (route: string, houseId?: number) => {

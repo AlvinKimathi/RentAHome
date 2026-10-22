@@ -4,7 +4,6 @@ import { Mail, Lock, User as UserIcon, Phone, ArrowRight, ArrowLeft, AlertCircle
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
-import { GoogleSignInModal } from '../components/GoogleSignInModal';
 
 interface LoginProps {
   onSuccess: () => void;
@@ -17,7 +16,6 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   const [selectedRole, setSelectedRole] = useState<'tenant' | 'landlord'>('tenant');
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
-  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
   // Form Fields
   const [fullName, setFullName] = useState('');
@@ -88,8 +86,17 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
   };
 
   const handleGoogleSignIn = () => {
+    setIsLoading(true);
     setError(null);
-    setIsGoogleModalOpen(true);
+    sessionStorage.setItem('rentahome_oauth_role', selectedRole);
+
+    const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || '104829104812-rentahome.apps.googleusercontent.com';
+    const redirectUri = window.location.origin;
+    const scope = encodeURIComponent('openid email profile');
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token%20id_token&scope=${scope}&nonce=${Date.now()}&prompt=select_account`;
+
+    // Direct browser redirect to Google OAuth 2.0 authentication server
+    window.location.href = authUrl;
   };
 
   return (
@@ -488,13 +495,6 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateHome }) => {
           setEmail(resetEmail);
           setError(null);
         }}
-      />
-
-      <GoogleSignInModal
-        isOpen={isGoogleModalOpen}
-        onClose={() => setIsGoogleModalOpen(false)}
-        onSuccess={() => onSuccess()}
-        initialRole={selectedRole}
       />
     </div>
   );
