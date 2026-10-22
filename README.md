@@ -1,70 +1,68 @@
-# RentAHome - Rental House Vacancy Finder Management System
+# RentAHome - Rental House Vacancy Finder
 
-An end-to-end, full-stack web application built to eliminate the manual, exhausting, and expensive process of searching for rental houses by connecting prospective tenants directly with verified property owners across Kenya with zero broker markups.
+RentAHome is a modern web platform designed to help people in Kenya find vacant rental houses quickly and easily without paying broker fees. It connects tenants directly with landlords and property managers.
 
----
-
-## Key Features
-
-### 1. Tenant Features
-- **Search & Advanced Filtering:** Search by keyword, neighborhood (Ruaraka, Roysambu, Ngara, Kasarani, Kilimani, Westlands), house type (Bedsitter, Single Room, 1-Bed, 2-Bed, 3-Bed), and monthly price range (KES).
-- **Comprehensive Property Pages:** High-resolution photo galleries, exact rent in KES, deposit amounts, specs (beds, baths, parking), full description, and verified amenities checklist (24/7 borehole water, tokens, security guard, WiFi).
-- **Direct Landlord Contact:** Direct phone dialer and WhatsApp chat links with zero broker commission fees.
-- **Viewing Scheduling:** Request inspection dates and time slots directly from the property page.
-- **Tenant Dashboard:** Track submitted viewing requests and real-time landlord confirmation statuses.
-
-### 2. Landlord Features
-- **4-Step Post Vacancy Wizard:**
-  1. Property Details (Title, House Type, Location, Description, Beds, Baths, Parking)
-  2. Photo & Media Uploader (Drag-and-drop file upload or image URLs with live previews)
-  3. Pricing & Amenities (Monthly Rent in KES, Deposit, Amenities checkboxes)
-  4. Review & Instant Publication
-- **Real-Time Status Management:** One-click toggle between **Vacant** and **Occupied** to keep the platform vacancy listings 100% fresh.
-- **Landlord Dashboard:** Review all posted properties, track viewings, and accept or decline tenant appointment requests.
-
-### 3. Control Panel Administrator Features
-- **System Overview & Health:** Platform statistics on total properties, vacancies, occupancy rate, total landlords, tenants, and bookings.
-- **Listing Moderation:** Approve, reject, or remove inappropriate property listings.
-- **User Management:** View all registered accounts and activate or deactivate users.
-- **Vacancy & Market Analytics:** Automated reports showing vacancy distributions and average rental prices by house type and location.
+Live Website: **[https://rentahome.dpdns.org](https://rentahome.dpdns.org)**  
+Alternative Link: **[https://www.rentahome.dpdns.org](https://www.rentahome.dpdns.org)**
 
 ---
 
-## Architecture & Technology Stack
+## What RentAHome Does
 
-- **Frontend:** React 18/19, TypeScript, Vite, Tailwind CSS v4, Lucide React (standard UI widgets, no emojis, matching the modern Figma Design System with `'Urbanist'` typography and floating blur navbar).
-- **Backend:** PHP 8.2 REST API with PDO, prepared statements, and custom HMAC-SHA256 JWT authentication.
-- **Database:** MariaDB / MySQL running in XAMPP (`geta_rental_db`) with relational integrity between `users`, `houses`, `house_images`, `bookings`, and `password_resets`.
+### For Tenants
+- **Find Available Homes:** Search through vacant houses in Nairobi estates such as Ruaraka, Roysambu, Ngara, Kasarani, Westlands, and Kilimani.
+- **Filter by Your Needs:** Filter listings by neighborhood, monthly rent, and house type (Single Rooms, Bedsitters, 1 Bedroom, 2 Bedroom, 3 Bedroom).
+- **Direct Landlord Contact:** Reach landlords directly through phone calls or WhatsApp with zero middleman charges.
+- **Book House Viewings:** Select a convenient date and time to visit and inspect the house in person.
+- **Tenant Dashboard:** Track all your booked viewings and see whether the landlord has confirmed them.
+
+### For Landlords
+- **Post Vacancies Easily:** A simple 4-step wizard to upload photos, enter rent, describe amenities (like borehole water, security, and electricity tokens), and publish your vacant house.
+- **Manage House Status:** Quickly switch houses between "Vacant" and "Occupied" so tenants only see available homes.
+- **Landlord Dashboard:** Review all your properties, see incoming inspection requests from tenants, and accept or decline appointments.
+
+### For Administrators (Control Panel)
+- **Review Listings:** Approve, review, or remove property listings to ensure quality and safety.
+- **Manage Users:** Monitor tenant and landlord accounts with the ability to activate or suspend profiles.
+- **Audit Logs:** View a live activity history of actions taken on the site by tenants and landlords.
+- **Site Analytics:** Monitor visitor numbers, popular search areas, viewing inquiries, and daily traffic.
 
 ---
 
-## Default Demo Accounts
+## Technology Behind the Project
 
-| Role | Email | Password | Description |
-| :--- | :--- | :--- | :--- |
-| **Administrator** | `admin@leon.com` | `admin123` | Control Panel: system moderation, analytics & user controls |
-| **Landlord** | `landlord@leon.com` | `landlord123` | Mwangi Properties (manage listings & viewings) |
-| **Tenant** | `tenant@leon.com` | `tenant123` | Kevin Ochieng (browse & book house inspections) |
-
-*(You can also register new Tenant or Landlord accounts directly on the landing page portal).*
+- **Frontend:** Built with React, TypeScript, Vite, and Tailwind CSS. Responsive for both mobile phones and desktop computers.
+- **Backend:** Fast, lightweight REST API built with PHP using PDO prepared statements and secure token-based authentication.
+- **Database:** Relational database supporting both PostgreSQL (on cloud hosting) and MySQL / MariaDB (for local testing).
+- **Hosting:** Docker container and static hosting running on Render connected to a custom DigitalPlat domain.
 
 ---
 
-## Running the Application Locally
+## How to Run the Project Locally
 
-### 1. Database & MySQL
-Ensure MariaDB/MySQL is running in XAMPP (Port 3306). Schema and seed files are located in `database/`:
+### 1. Database Setup
+Start MySQL in XAMPP. Import the initial database files found in the `database` folder:
 - `database/schema.sql`
 - `database/seed.sql`
 
-### 2. Start the PHP Backend API
+### 2. Start the Backend API
+Run the built-in PHP server pointing to the backend public folder:
 ```powershell
-& "C:\xampp\php\php.exe" -S 127.0.0.1:8000 -t "c:\Users\Admin\OneDrive\Desktop\Projects\Geta\backend\public"
+php -S 127.0.0.1:8000 -t backend/public
 ```
 
-### 3. Start the Frontend Application
+### 3. Start the Frontend
+Open another terminal, navigate into the frontend folder, and start the development server:
 ```powershell
 cd frontend
-npm run dev -- --host
+npm install
+npm run dev
 ```
-Open **`http://localhost:3000/`** in your browser.
+
+Open **`http://localhost:3000`** in your browser.
+
+---
+
+## Contact & Support
+- **Support Phone & WhatsApp:** +254 718 608582
+- **Website:** https://rentahome.dpdns.org
